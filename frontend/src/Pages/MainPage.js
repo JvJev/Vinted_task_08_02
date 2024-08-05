@@ -1,4 +1,3 @@
-// MainPage.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ImageList from '../Components/ImageList';
@@ -9,6 +8,7 @@ function MainPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const observer = useRef();
+  const uniqueImageIds = useRef(new Set());
 
   useEffect(() => {
     fetchData();
@@ -32,7 +32,15 @@ function MainPage() {
       }
       const data = await response.json();
       const filteredImages = data.photos.filter(photo => photo.alt.trim() !== '');
-      setImages(prevImages => [...prevImages, ...filteredImages]);
+      const uniqueImages = filteredImages.filter(photo => {
+        if (uniqueImageIds.current.has(photo.id)) {
+          return false;
+        } else {
+          uniqueImageIds.current.add(photo.id);
+          return true;
+        }
+      });
+      setImages(prevImages => [...prevImages, ...uniqueImages]);
       setCurrentPage(prevPage => prevPage + 1);
     } catch (error) {
       console.error('Error fetching data:', error.message);
@@ -64,7 +72,6 @@ function MainPage() {
 
   return (
     <div className='mainPage'>
-
       <div className="sticky-container">
         <Link to="/favorite-photos">
           <button className="favorites">View Favorites</button>
@@ -77,3 +84,4 @@ function MainPage() {
 }
 
 export default MainPage;
+

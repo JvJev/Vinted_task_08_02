@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ImageCard.css';
 
 const ImageCard = ({ image }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const favoritePhotos = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
+    setIsFavorite(favoritePhotos[image.id] || false);
+  }, [image.id]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -22,16 +27,12 @@ const ImageCard = ({ image }) => {
 
   return (
     <div
-      className={`image-card ${isHovered ? 'hovered dimmed' : ''}`}
+      className={`image-card ${isHovered ? 'hovered' : ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <img src={image.src.medium} className="card-image" alt={image.alt} />
-      <div
-        className={`card-body text-center justify-content-center align-items-center ${
-          isHovered ? 'visible' : 'invisible'
-        }`}
-      >
+      <div className={`card-body ${isHovered ? 'visible' : 'invisible'}`}>
         <div className="card-title">{image.photographer}</div>
         <hr className="divider" />
         <div className="card-text">{image.alt}</div>
