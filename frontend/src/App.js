@@ -1,18 +1,18 @@
-// App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
 import MainPage from './Pages/MainPage';
-import FavoritePhotos from './Pages/FavoritePhotos';
+import GlobalContext from './Context/GlobalContext';
 import './App.css';
 
 function App() {
+  const [images, setImages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
   return (
-    <Router>
-      <Routes>
-        <Route exact path="/" element={<MainPage />} />
-        <Route path="/favorite-photos" element={<FavoritePhotos />} />
-      </Routes>
-    </Router>
+    <GlobalContext.Provider value={{ images, setImages, currentPage, setCurrentPage }}>
+      <div>
+        <MainPage />
+      </div>
+    </GlobalContext.Provider>
   );
 }
 

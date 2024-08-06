@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './FavoritePhotos.css'; 
+import { Link } from '../Routes/CustomRouter'; // Update the import path as needed
+import './FavoritePhotos.css';
 
 function FavoritePhotos() {
   const [favoritePhotoIds, setFavoritePhotoIds] = useState([]);
@@ -51,9 +51,9 @@ function FavoritePhotos() {
       </div>
       <div className="image-grid">
         {favoritePhotos.map((photo) => (
-          <div key={photo.id} className="image-card">
+          <div key={photo.id}>
             <img src={photo.src.medium} alt={photo.alt} />
-            <button onClick={() => removeFromFavorites(photo.id)} className="remove-button">Remove from Favorites</button>
+            <button onClick={() => removeFromFavorites(photo.id)}>Remove from Favorites</button>
           </div>
         ))}
       </div>

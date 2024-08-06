@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import GlobalContext from '../Context/GlobalContext'; // Context API for global state management
 import ImageList from '../Components/ImageList';
 import '../App.css';
+import FavoritePhotos from './FavoritePhotos';
 
 function MainPage() {
-  const [images, setImages] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { images, setImages, currentPage, setCurrentPage } = useContext(GlobalContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false); // State to toggle between pages
   const observer = useRef();
   const uniqueImageIds = useRef(new Set());
 
@@ -73,12 +74,18 @@ function MainPage() {
   return (
     <div className='mainPage'>
       <div className="sticky-container">
-        <Link to="/favorite-photos">
-          <button className="favorites">View Favorites</button>
-        </Link>
+        <button className="favorites" onClick={() => setShowFavorites(!showFavorites)}>
+          {showFavorites ? 'View Main Page' : 'View Favorites'}
+        </button>
       </div>
-      <ImageList images={images} />
-      <div ref={lastImageRef}></div>
+      {showFavorites ? (
+        <FavoritePhotos />
+      ) : (
+        <>
+          <ImageList images={images} />
+          <div ref={lastImageRef}></div>
+        </>
+      )}
     </div>
   );
 }
