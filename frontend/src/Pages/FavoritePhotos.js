@@ -1,4 +1,3 @@
-// FavoritePhotos.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './FavoritePhotos.css'; 
@@ -45,7 +44,6 @@ function FavoritePhotos() {
 
   return (
     <div className="favorite-photos">
-
       <div className="sticky-container">
         <Link to="/">
           <button className="back">Back to Main Page</button>
@@ -53,9 +51,9 @@ function FavoritePhotos() {
       </div>
       <div className="image-grid">
         {favoritePhotos.map((photo) => (
-          <div key={photo.id}>
+          <div key={photo.id} className="image-card">
             <img src={photo.src.medium} alt={photo.alt} />
-            <button onClick={() => removeFromFavorites(photo.id)}>Remove from Favorites</button>
+            <button onClick={() => removeFromFavorites(photo.id)} className="remove-button">Remove from Favorites</button>
           </div>
         ))}
       </div>
@@ -64,4 +62,3 @@ function FavoritePhotos() {
 }
 
 export default FavoritePhotos;
-
