@@ -51,9 +51,14 @@ function FavoritePhotos() {
       </div>
       <div className="image-grid">
         {favoritePhotos.map((photo) => (
-          <div key={photo.id}>
-            <img src={photo.src.medium} alt={photo.alt} />
-            <button onClick={() => removeFromFavorites(photo.id)}>Remove from Favorites</button>
+          <div key={photo.id} className="image-card">
+            <img src={photo.src.medium} alt={photo.alt} className="card-image" />
+            <div className="overlay">
+              <div className="card-body">
+                <h2 className="card-title">{photo.alt}</h2>
+                <button onClick={() => removeFromFavorites(photo.id)} className="favorite-button">Remove from Favorites</button>
+              </div>
+            </div>
           </div>
         ))}
       </div>
