@@ -1,5 +1,4 @@
 import React, { useContext, useEffect } from 'react';
-import { Link } from '../Routes/CustomRouter';
 import { FavoritesContext } from '../Context/FavoritesContext';
 import './FavoritePhotos.css';
 
@@ -42,11 +41,6 @@ function FavoritePhotos() {
 
   return (
     <div className="favorite-photos">
-      <div className="sticky-container">
-        <Link to="/">
-          <button className="back">Back to Main Page</button>
-        </Link>
-      </div>
       <div className="image-grid">
         {state.favoritePhotos.map((photo) => (
           <div key={photo._id} className="image-card">
