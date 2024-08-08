@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 // import seedRouter from './routes/seedRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import photoRouter from './routes/photoRoutes.js'; // Add this line
+import seedRouter from './routes/seedRouter.js';
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use('/api/seed', seedRouter);
+app.use('/api/seed', seedRouter);
 app.use('/api/users', userRouter);
 app.use('/api/photos', photoRouter); // Add this line
 

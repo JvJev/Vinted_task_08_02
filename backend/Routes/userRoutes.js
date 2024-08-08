@@ -1,6 +1,5 @@
 import express from 'express';
-import User from '../models/userModel.js'; // Adjust the path if needed
-import bcrypt from 'bcryptjs';
+import User from '../models/userModel.js'; 
 import { generateToken } from '../utils.js';
 import expressAsyncHandler from 'express-async-handler';
 

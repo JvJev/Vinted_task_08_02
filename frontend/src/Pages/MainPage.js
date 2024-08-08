@@ -39,17 +39,23 @@ function MainPage() {
   useEffect(() => {
     fetchData();
 
-    return () => lazyLoader.current?.disconnect();
+    return () => lazyLoader.current?.disconnect(); // Cleanup observer on unmount
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (showFavorites) return; // Don't set up observer if on favorites page
+    if (isLoading) return; // Don't observe while loading
+
     lazyLoader.current = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) fetchData();
     });
 
     lastImageRef.current && lazyLoader.current.observe(lastImageRef.current);
-  }, [isLoading]);
+
+    return () => {
+      lazyLoader.current?.disconnect(); // Cleanup observer on unmount
+    };
+  }, [showFavorites, isLoading]); // Dependencies
 
   return (
     <div className="mainPage">
@@ -58,10 +64,14 @@ function MainPage() {
           {showFavorites ? 'View Main Page' : 'View Favorites'}
         </button>
       </div>
-      {showFavorites ? <FavoritePhotos /> : <>
-        <ImageList images={images} />
-        <div ref={lastImageRef}></div>
-      </>}
+      {showFavorites ? (
+        <FavoritePhotos />
+      ) : (
+        <>
+          <ImageList images={images} />
+          <div ref={lastImageRef}></div>
+        </>
+      )}
     </div>
   );
 }
