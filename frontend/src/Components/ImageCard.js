@@ -3,11 +3,11 @@ import './ImageCard.css';
 
 const ImageCard = ({ image }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false); // Ensure these lines are present
 
   useEffect(() => {
     const favoritePhotos = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
-    setIsFavorite(favoritePhotos[image.id] || false);
+    setIsFavorite(favoritePhotos[image.id] || false); // Ensure image.id is used here correctly
   }, [image.id]);
 
   const handleMouseEnter = () => {
@@ -18,11 +18,31 @@ const ImageCard = ({ image }) => {
     setIsHovered(false);
   };
 
-  const handleFavoriteClick = () => {
-    const favoritePhotos = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
-    favoritePhotos[image.id] = !isFavorite;
-    localStorage.setItem('favoritePhotos', JSON.stringify(favoritePhotos));
-    setIsFavorite(prev => !prev);
+  const handleFavoriteClick = async () => {
+    const favorite = !isFavorite;
+    setIsFavorite(favorite);
+
+    try {
+      const method = favorite ? 'POST' : 'DELETE';
+      const url = favorite ? '/api/photos' : `/api/photos/${image.id}`;
+
+      const body = favorite ? JSON.stringify({
+        photoId: image.id,
+        alt: image.alt,
+        src: image.src.medium,
+      }) : null;
+
+      await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body,
+      });
+    } catch (error) {
+      console.error('Error updating favorite:', error.message);
+    }
   };
 
   return (
@@ -45,3 +65,4 @@ const ImageCard = ({ image }) => {
 };
 
 export default ImageCard;
+

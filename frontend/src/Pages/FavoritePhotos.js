@@ -1,45 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '../Routes/CustomRouter'; // Update the import path as needed
+import { Link } from '../Routes/CustomRouter';
 import './FavoritePhotos.css';
 
 function FavoritePhotos() {
-  const [favoritePhotoIds, setFavoritePhotoIds] = useState([]);
   const [favoritePhotos, setFavoritePhotos] = useState([]);
 
   useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
-    setFavoritePhotoIds(Object.keys(savedFavorites));
-  }, []);
-
-  useEffect(() => {
-    const fetchFavoritePhotoDetails = async () => {
+    const fetchFavoritePhotos = async () => {
       try {
-        const photoDetailsPromises = favoritePhotoIds.map(async (photoId) => {
-          const response = await fetch(`https://api.pexels.com/v1/photos/${photoId}`, {
-            headers: {
-              Authorization: 'iRjeI3Mfqu4xP2BcMZxJQY0DNYiRO32Ri2ptb5GdvhQoOTuYNMJICWnB',
-            },
-          });
-          if (!response.ok) {
-            throw new Error('Failed to fetch photo details');
-          }
-          const data = await response.json();
-          return data;
+        const response = await fetch('/api/photos', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming you store a JWT token in localStorage
+          },
         });
-        const photoDetails = await Promise.all(photoDetailsPromises);
-        setFavoritePhotos(photoDetails);
+        if (!response.ok) {
+          throw new Error('Failed to fetch favorite photos');
+        }
+        const data = await response.json();
+        setFavoritePhotos(data);
       } catch (error) {
-        console.error('Error fetching photo details:', error.message);
+        console.error('Error fetching favorite photos:', error.message);
       }
     };
-    fetchFavoritePhotoDetails();
-  }, [favoritePhotoIds]);
+    fetchFavoritePhotos();
+  }, []);
 
-  const removeFromFavorites = (id) => {
-    const favoritePhotos = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
-    delete favoritePhotos[id];
-    localStorage.setItem('favoritePhotos', JSON.stringify(favoritePhotos));
-    setFavoritePhotoIds(Object.keys(favoritePhotos));
+  const removeFromFavorites = async (id) => {
+    try {
+      await fetch(`/api/photos/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setFavoritePhotos(prev => prev.filter(photo => photo._id !== id));
+    } catch (error) {
+      console.error('Error removing favorite photo:', error.message);
+    }
   };
 
   return (
@@ -51,12 +48,12 @@ function FavoritePhotos() {
       </div>
       <div className="image-grid">
         {favoritePhotos.map((photo) => (
-          <div key={photo.id} className="image-card">
-            <img src={photo.src.medium} alt={photo.alt} className="card-image" />
+          <div key={photo._id} className="image-card">
+            <img src={photo.src} alt={photo.alt} className="card-image" />
             <div className="overlay">
               <div className="card-body">
                 <h2 className="card-title">{photo.alt}</h2>
-                <button onClick={() => removeFromFavorites(photo.id)} className="favorite-button">Remove from Favorites</button>
+                <button onClick={() => removeFromFavorites(photo._id)} className="favorite-button">Remove from Favorites</button>
               </div>
             </div>
           </div>
@@ -67,3 +64,4 @@ function FavoritePhotos() {
 }
 
 export default FavoritePhotos;
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import GlobalContext from '../Context/GlobalContext'; // Context API for global state management
+import GlobalContext from '../Context/GlobalContext';
 import ImageList from '../Components/ImageList';
 import '../App.css';
 import FavoritePhotos from './FavoritePhotos';
@@ -7,18 +7,10 @@ import FavoritePhotos from './FavoritePhotos';
 function MainPage() {
   const { images, setImages, currentPage, setCurrentPage } = useContext(GlobalContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false); // State to toggle between pages
-  const observer = useRef();
+  const [showFavorites, setShowFavorites] = useState(false);
+  const lazyLoader = useRef();
   const uniqueImageIds = useRef(new Set());
-
-  useEffect(() => {
-    fetchData();
-    return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
-    };
-  }, []);
+  const lastImageRef = useRef();
 
   const fetchData = async () => {
     try {
@@ -28,21 +20,15 @@ function MainPage() {
           Authorization: 'iRjeI3Mfqu4xP2BcMZxJQY0DNYiRO32Ri2ptb5GdvhQoOTuYNMJICWnB',
         },
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch images');
-      }
+      if (!response.ok) throw new Error('Failed to fetch images');
+
       const data = await response.json();
-      const filteredImages = data.photos.filter(photo => photo.alt.trim() !== '');
-      const uniqueImages = filteredImages.filter(photo => {
-        if (uniqueImageIds.current.has(photo.id)) {
-          return false;
-        } else {
-          uniqueImageIds.current.add(photo.id);
-          return true;
-        }
-      });
-      setImages(prevImages => [...prevImages, ...uniqueImages]);
-      setCurrentPage(prevPage => prevPage + 1);
+      const uniqueImages = data.photos
+        .filter(photo => photo.alt.trim() !== '')
+        .filter(photo => !uniqueImageIds.current.has(photo.id) && uniqueImageIds.current.add(photo.id));
+
+      setImages(prev => [...prev, ...uniqueImages]);
+      setCurrentPage(prev => prev + 1);
     } catch (error) {
       console.error('Error fetching data:', error.message);
     } finally {
@@ -50,42 +36,32 @@ function MainPage() {
     }
   };
 
-  const lastImageRef = useRef();
+  useEffect(() => {
+    fetchData();
 
-  const handleObserver = (entries) => {
-    const target = entries[0];
-    if (target.isIntersecting) {
-      fetchData();
-    }
-  };
+    return () => lazyLoader.current?.disconnect();
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
-    observer.current = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: '0px',
-      threshold: 1.0,
+    lazyLoader.current = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) fetchData();
     });
-    if (lastImageRef.current) {
-      observer.current.observe(lastImageRef.current);
-    }
+
+    lastImageRef.current && lazyLoader.current.observe(lastImageRef.current);
   }, [isLoading]);
 
   return (
-    <div className='mainPage'>
+    <div className="mainPage">
       <div className="sticky-container">
         <button className="favorites" onClick={() => setShowFavorites(!showFavorites)}>
           {showFavorites ? 'View Main Page' : 'View Favorites'}
         </button>
       </div>
-      {showFavorites ? (
-        <FavoritePhotos />
-      ) : (
-        <>
-          <ImageList images={images} />
-          <div ref={lastImageRef}></div>
-        </>
-      )}
+      {showFavorites ? <FavoritePhotos /> : <>
+        <ImageList images={images} />
+        <div ref={lastImageRef}></div>
+      </>}
     </div>
   );
 }
