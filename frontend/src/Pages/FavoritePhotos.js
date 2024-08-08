@@ -1,29 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link } from '../Routes/CustomRouter';
+import { FavoritesContext } from '../Context/FavoritesContext';
 import './FavoritePhotos.css';
 
 function FavoritePhotos() {
-  const [favoritePhotos, setFavoritePhotos] = useState([]);
+  const { state, dispatch } = useContext(FavoritesContext);
 
   useEffect(() => {
     const fetchFavoritePhotos = async () => {
       try {
         const response = await fetch('/api/photos', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming you store a JWT token in localStorage
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         if (!response.ok) {
           throw new Error('Failed to fetch favorite photos');
         }
         const data = await response.json();
-        setFavoritePhotos(data);
+        dispatch({ type: 'SET_FAVORITES', payload: data });
       } catch (error) {
         console.error('Error fetching favorite photos:', error.message);
       }
     };
     fetchFavoritePhotos();
-  }, []);
+  }, [dispatch]);
 
   const removeFromFavorites = async (id) => {
     try {
@@ -33,7 +34,7 @@ function FavoritePhotos() {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setFavoritePhotos(prev => prev.filter(photo => photo._id !== id));
+      dispatch({ type: 'REMOVE_FAVORITE', payload: { id } });
     } catch (error) {
       console.error('Error removing favorite photo:', error.message);
     }
@@ -47,13 +48,15 @@ function FavoritePhotos() {
         </Link>
       </div>
       <div className="image-grid">
-        {favoritePhotos.map((photo) => (
+        {state.favoritePhotos.map((photo) => (
           <div key={photo._id} className="image-card">
             <img src={photo.src} alt={photo.alt} className="card-image" />
             <div className="overlay">
               <div className="card-body">
                 <h2 className="card-title">{photo.alt}</h2>
-                <button onClick={() => removeFromFavorites(photo._id)} className="favorite-button">Remove from Favorites</button>
+                <button onClick={() => removeFromFavorites(photo._id)} className="favorite-button">
+                  Remove from Favorites
+                </button>
               </div>
             </div>
           </div>

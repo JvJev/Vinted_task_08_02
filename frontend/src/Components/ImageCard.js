@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { FavoritesContext } from '../Context/FavoritesContext';
 import './ImageCard.css';
 
 const ImageCard = ({ image }) => {
+  const { state, dispatch } = useContext(FavoritesContext);
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); // Ensure these lines are present
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    const favoritePhotos = JSON.parse(localStorage.getItem('favoritePhotos')) || {};
-    setIsFavorite(favoritePhotos[image.id] || false); // Ensure image.id is used here correctly
-  }, [image.id]);
+    setIsFavorite(state.favoritePhotos.some(photo => photo.photoId === image.id));
+  }, [state.favoritePhotos, image.id]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -25,14 +26,15 @@ const ImageCard = ({ image }) => {
     try {
       const method = favorite ? 'POST' : 'DELETE';
       const url = favorite ? '/api/photos' : `/api/photos/${image.id}`;
+      const body = favorite
+        ? JSON.stringify({
+            photoId: image.id,
+            alt: image.alt,
+            src: image.src.medium,
+          })
+        : null;
 
-      const body = favorite ? JSON.stringify({
-        photoId: image.id,
-        alt: image.alt,
-        src: image.src.medium,
-      }) : null;
-
-      await fetch(url, {
+      const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -40,6 +42,16 @@ const ImageCard = ({ image }) => {
         },
         body,
       });
+
+      if (!response.ok) throw new Error('Failed to update favorite status');
+
+      const updatedPhoto = { ...image, id: image.id };
+
+      if (favorite) {
+        dispatch({ type: 'ADD_FAVORITE', payload: updatedPhoto });
+      } else {
+        dispatch({ type: 'REMOVE_FAVORITE', payload: updatedPhoto });
+      }
     } catch (error) {
       console.error('Error updating favorite:', error.message);
     }
@@ -65,4 +77,3 @@ const ImageCard = ({ image }) => {
 };
 
 export default ImageCard;
-

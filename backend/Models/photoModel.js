@@ -12,5 +12,7 @@ const photoSchema = new mongoose.Schema(
   }
 );
 
+photoSchema.index({ user: 1, photoId: 1 }, { unique: true }); // Ensures a user can't favorite the same photo multiple times
+
 const Photo = mongoose.model('Photo', photoSchema);
 export default Photo;

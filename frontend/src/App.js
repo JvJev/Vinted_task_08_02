@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MainPage from './Pages/MainPage';
 import GlobalContext from './Context/GlobalContext';
+import { FavoritesProvider } from './Context/FavoritesContext';
 import './App.css';
 
 function App() {
@@ -9,9 +10,11 @@ function App() {
 
   return (
     <GlobalContext.Provider value={{ images, setImages, currentPage, setCurrentPage }}>
-      <div>
-        <MainPage />
-      </div>
+      <FavoritesProvider>
+        <div>
+          <MainPage />
+        </div>
+      </FavoritesProvider>
     </GlobalContext.Provider>
   );
 }
